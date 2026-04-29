@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('admin.dashboard_title') }} | ZiyoDev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body" data-theme="dark">
+    <div class="admin-shell">
+        <header class="admin-header">
+            <div>
+                <span class="hero-section__eyebrow">ZiyoDev CMS</span>
+                <h1>{{ t('admin.dashboard_title') }}</h1>
+            </div>
+            <div class="admin-header__actions">
+                <div class="language-switcher">
+                    {% for lang_code, lang_label in languages.items() %}
+                    <a href="{{ url_for('set_language', lang=lang_code, next=request.path) }}"
+                       class="{{ 'is-active' if current_lang == lang_code else '' }}">
+                        {{ lang_label }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <a class="button button--ghost" href="{{ url_for_lang('home') }}">{{ t('admin.open_site') }}</a>
+                <a class="button button--primary" href="{{ url_for('admin_logout', lang=current_lang) }}">{{ t('admin.logout') }}</a>
+            </div>
+        </header>
+
+        <section class="admin-stats admin-stats--two">
+            <article class="content-card">
+                <h2>{{ section_count }}</h2>
+                <p>{{ t('admin.sections_count') }}</p>
+            </article>
+            <article class="content-card">
+                <h2>{{ message_count }}</h2>
+                <p>{{ t('admin.messages_count') }}</p>
+            </article>
+        </section>
+
+        <section class="admin-grid admin-grid--compact">
+            <div class="admin-column">
+                <article class="content-card">
+                    <div class="content-card__meta">
+                        <span>GUIDE</span>
+                        <span>{{ t('admin.quick_guide_title') }}</span>
+                    </div>
+                    <h2>{{ t('admin.quick_guide_title') }}</h2>
+                    <p>{{ t('admin.quick_guide_text') }}</p>
+                    <div class="admin-help-box">
+                        <h3>{{ t('admin.home_help_title') }}</h3>
+                        <p>{{ t('admin.home_help_hero') }}</p>
+                        <p>{{ t('admin.home_help_services') }}</p>
+                        <p>{{ t('admin.home_help_how') }}</p>
+                        <p>{{ t('admin.live_tip') }}</p>
+                    </div>
+                </article>
+            </div>
+            <div class="admin-column">
+                <article class="content-card">
+                    <div class="content-card__meta">
+                        <span>FILTER</span>
+                        <span>{{ t('admin.content_sections') }}</span>
+                    </div>
+                    <h2>{{ t('admin.content_sections') }}</h2>
+                    <div class="admin-filter-bar">
+                        <button type="button" class="admin-filter-button is-active" data-page-filter="all">{{ t('admin.filter_all') }}</button>
+                        {% for option in page_options %}
+                        <button type="button" class="admin-filter-button" data-page-filter="{{ option.value }}">{{ option.label }}</button>
+                        {% endfor %}
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="admin-grid">
+            <div class="admin-column">
+                <article class="content-card">
+                    <div class="content-card__meta">
+                        <span>ADMIN</span>
+                        <span>{{ t('admin.settings_title') }}</span>
+                    </div>
+                    <h2>{{ t('admin.settings_title') }}</h2>
+                    <p>{{ t('admin.settings_subtitle') }}</p>
+                    <form id="admin-settings-form" class="admin-form-stack" data-save-message="{{ t('admin.settings_saved') }}" data-save-error="{{ t('toast.save_error') }}">
+                        <label>
+                            <span>{{ t('admin.settings_current_username') }}</span>
+                            <input type="text" name="username" value="{{ admin_username }}" required>
+                        </label>
+                        <label>
+                            <span>{{ t('admin.settings_current_password') }}</span>
+                            <input type="password" name="current_password" required>
+                        </label>
+                        <label>
+                            <span>{{ t('admin.settings_new_password') }}</span>
+                            <input type="password" name="new_password" placeholder="******">
+                        </label>
+                        <label>
+                            <span>{{ t('admin.settings_confirm_password') }}</span>
+                            <input type="password" name="confirm_password" placeholder="******">
+                        </label>
+                        <button class="button button--primary" type="submit">{{ t('admin.settings_button') }}</button>
+                    </form>
+                </article>
+
+                <article class="content-card">
+                    <div class="content-card__meta">
+                        <span>CMS</span>
+                        <span>{{ t('admin.new_section') }}</span>
+                    </div>
+                    <h2>{{ t('admin.new_section') }}</h2>
+                    <p>{{ t('admin.new_section_subtitle') }}</p>
+                    <details class="admin-details">
+                        <summary>{{ t('admin.open_form') }}</summary>
+                        <div class="admin-details__content">
+                            <form id="new-section-form" class="admin-form-stack" data-save-message="{{ t('toast.save_success') }}" data-save-error="{{ t('toast.save_error') }}">
+                                <div class="translation-group translation-group--primary">
+                                    <label>
+                                        <span>{{ t('admin.lang_uz') }}: {{ t('admin.title_label') }}</span>
+                                        <input type="text" name="title_uz" required>
+                                    </label>
+                                    <label>
+                                        <span>{{ t('admin.lang_uz') }}: {{ t('admin.content_label') }}</span>
+                                        <textarea name="content_html_uz" rows="6" required></textarea>
+                                    </label>
+                                </div>
+
+                                <details class="admin-details admin-details--inner">
+                                    <summary>{{ t('admin.optional_languages') }}</summary>
+                                    <div class="admin-details__content">
+                                        {% for lang_code in ['en', 'ru'] %}
+                                        <div class="translation-group">
+                                            <h3>{{ t('admin.lang_' ~ lang_code) }}</h3>
+                                            <label>
+                                                <span>{{ t('admin.title_label') }}</span>
+                                                <input type="text" name="title_{{ lang_code }}">
+                                            </label>
+                                            <label>
+                                                <span>{{ t('admin.content_label') }}</span>
+                                                <textarea name="content_html_{{ lang_code }}" rows="5"></textarea>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+
+                                <details class="admin-details admin-details--inner">
+                                    <summary>{{ t('admin.advanced_settings') }}</summary>
+                                    <div class="admin-details__content">
+                                        <div class="field-grid">
+                                            <label>
+                                                <span>{{ t('admin.page_name') }}</span>
+                                                <select name="page_name" required>
+                                                    {% for option in page_options %}
+                                                    <option value="{{ option.value }}">{{ option.label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </label>
+                                            <label>
+                                                <span>{{ t('admin.section_id') }}</span>
+                                                <input type="text" name="section_id" placeholder="home-custom-block">
+                                            </label>
+                                        </div>
+                                        <div class="field-grid field-grid--single">
+                                            <label>
+                                                <span>{{ t('admin.sort_order') }}</span>
+                                                <input type="number" name="sort_order" value="0">
+                                            </label>
+                                        </div>
+                                        <label class="checkbox-row">
+                                            <input type="checkbox" name="is_active" checked>
+                                            <span>{{ t('admin.active') }}</span>
+                                        </label>
+                                    </div>
+                                </details>
+
+                                <button class="button button--primary" type="submit">{{ t('admin.create_button') }}</button>
+                            </form>
+                        </div>
+                    </details>
+                </article>
+
+                <article class="content-card">
+                    <div class="content-card__meta">
+                        <span>CONTACT</span>
+                        <span>{{ t('admin.contact_inbox') }}</span>
+                    </div>
+                    <h2>{{ t('admin.contact_inbox') }}</h2>
+                    <div class="messages-table">
+                        {% for message in messages %}
+                        <details class="message-item">
+                            <summary class="message-summary">
+                                <div class="message-summary__top">
+                                    <strong>{{ message.name }}</strong>
+                                    <span>{{ message.email }}</span>
+                                </div>
+                                <p class="message-subject">{{ message.subject or t('admin.no_subject') }}</p>
+                                <p class="message-preview">{{ message.message_content[:80] }}{% if message.message_content|length > 80 %}...{% endif %}</p>
+                                <span class="message-summary__action">{{ t('admin.show_more') }}</span>
+                            </summary>
+                            <div class="message-details">
+                                <p>{{ message.message_content }}</p>
+                                <time>{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</time>
+                            </div>
+                        </details>
+                        {% else %}
+                        <p>{{ t('admin.no_messages') }}</p>
+                        {% endfor %}
+                    </div>
+                </article>
+            </div>
+
+            <div class="admin-column">
+                {% for section in sections %}
+                <article class="content-card admin-edit-card" data-page-name="{{ section.page_name }}">
+                    <div class="content-card__meta">
+                        <span>{{ section.page_name|upper }}</span>
+                        <span>{{ section.section_id }}</span>
+                    </div>
+                    <h2>{{ t('admin.edit_prefix') }}: {{ section.title }}</h2>
+                    <p class="admin-card-tip">{{ t('admin.live_tip') }}</p>
+                    <form class="admin-form-stack admin-section-form" data-save-message="{{ t('toast.save_success') }}" data-save-error="{{ t('toast.save_error') }}">
+                        <input type="hidden" name="content_id" value="{{ section.id }}">
+                        <div class="admin-group-heading">{{ t('admin.primary_fields') }}</div>
+                        <div class="translation-group translation-group--primary">
+                            <label>
+                                <span>{{ t('admin.lang_uz') }}: {{ t('admin.title_label') }}</span>
+                                <input type="text" name="title_uz" value="{{ section.translations['uz'].title }}" required>
+                            </label>
+                            <label>
+                                <span>{{ t('admin.lang_uz') }}: {{ t('admin.content_label') }}</span>
+                                <textarea name="content_html_uz" rows="8" required>{{ section.translations['uz'].content_html }}</textarea>
+                            </label>
+                        </div>
+
+                        <details class="admin-details">
+                            <summary>{{ t('admin.optional_languages') }}</summary>
+                            <div class="admin-details__content">
+                                {% for lang_code in ['en', 'ru'] %}
+                                <div class="translation-group">
+                                    <h3>{{ t('admin.lang_' ~ lang_code) }}</h3>
+                                    <label>
+                                        <span>{{ t('admin.title_label') }}</span>
+                                        <input type="text" name="title_{{ lang_code }}" value="{{ section.translations[lang_code].title }}">
+                                    </label>
+                                    <label>
+                                        <span>{{ t('admin.content_label') }}</span>
+                                        <textarea name="content_html_{{ lang_code }}" rows="6">{{ section.translations[lang_code].content_html }}</textarea>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </details>
+
+                        <details class="admin-details">
+                            <summary>{{ t('admin.advanced_settings') }}</summary>
+                            <div class="admin-details__content">
+                                <div class="field-grid">
+                                    <label>
+                                        <span>{{ t('admin.page_name') }}</span>
+                                        <select name="page_name" required>
+                                            {% for option in page_options %}
+                                            <option value="{{ option.value }}" {% if option.value == section.page_name %}selected{% endif %}>{{ option.label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>{{ t('admin.section_id') }}</span>
+                                        <input type="text" name="section_id" value="{{ section.section_id }}">
+                                    </label>
+                                </div>
+                                <div class="field-grid field-grid--single">
+                                    <label>
+                                        <span>{{ t('admin.sort_order') }}</span>
+                                        <input type="number" name="sort_order" value="{{ section.sort_order }}">
+                                    </label>
+                                </div>
+                                <label class="checkbox-row">
+                                    <input type="checkbox" name="is_active" {% if section.is_active %}checked{% endif %}>
+                                    <span>{{ t('admin.active') }}</span>
+                                </label>
+                            </div>
+                        </details>
+                        <button class="button button--primary" type="submit">{{ t('admin.save_button') }}</button>
+                    </form>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

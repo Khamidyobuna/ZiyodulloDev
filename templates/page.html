@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-section__copy">
+        <span class="hero-section__eyebrow">{{ page_meta.eyebrow }}</span>
+        <h1>{{ page_meta.headline }}</h1>
+        <p>{{ page_meta.subtitle }}</p>
+        {% if page_name == 'home' %}
+        <div class="hero-section__actions">
+            <a class="button button--primary" href="{{ url_for_lang('contact_page') }}">{{ t('home.cta') }}</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="hero-terminal">
+        <div class="hero-terminal__top">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="hero-terminal__body">
+            <p><span>$</span> {{ t('terminal.platform') }}</p>
+            <p><span>&gt;</span> ZiyoDev</p>
+            <p><span>$</span> {{ t('terminal.stack') }}</p>
+            <p><span>&gt;</span> Flask + SQLite + Telegram + Gemini</p>
+            <p><span>$</span> {{ t('terminal.status') }}</p>
+            <p><span>&gt;</span> {{ t('terminal.status_value') }}</p>
+        </div>
+    </div>
+</section>
+
+{% if page_name == 'home' %}
+<section class="stats-strip">
+    <article>
+        <strong>1</strong>
+        <span>{{ t('home.stats.memory') }}</span>
+    </article>
+    <article>
+        <strong>24/7</strong>
+        <span>{{ t('home.stats.ai') }}</span>
+    </article>
+    <article>
+        <strong>CMS</strong>
+        <span>{{ t('home.stats.cms') }}</span>
+    </article>
+</section>
+{% endif %}
+
+<section class="content-grid">
+    {% for section in sections %}
+    <article class="content-card">
+        <div class="content-card__meta">
+            <span>{{ section.page_name|upper }}</span>
+            <span>{{ section.section_id }}</span>
+        </div>
+        <h2>{{ section.title }}</h2>
+        <div class="prose">{{ section.content_html|safe }}</div>
+    </article>
+    {% endfor %}
+</section>
+
+{% if page_name == 'contact' %}
+<section class="contact-layout">
+    <article class="contact-card">
+        <h2>{{ t('contact.form.title') }}</h2>
+        <p>{{ t('contact.form.subtitle') }}</p>
+        <form id="contact-form" class="contact-form"
+              data-submit-label="{{ t('contact.send') }}"
+              data-loading-label="{{ t('contact.sending') }}"
+              data-success-message="{{ t('toast.contact_success') }}"
+              data-error-message="{{ t('toast.contact_error') }}">
+            <div class="field-grid">
+                <label>
+                    <span>{{ t('contact.name') }}</span>
+                    <input type="text" name="name" placeholder="{{ t('contact.name_placeholder') }}" required>
+                </label>
+                <label>
+                    <span>{{ t('contact.email') }}</span>
+                    <input type="email" name="email" placeholder="{{ t('contact.email_placeholder') }}" required>
+                </label>
+            </div>
+            <label>
+                <span>{{ t('contact.subject') }}</span>
+                <input type="text" name="subject" placeholder="{{ t('contact.subject_placeholder') }}">
+            </label>
+            <label>
+                <span>{{ t('contact.message') }}</span>
+                <textarea name="message" rows="6" placeholder="{{ t('contact.message_placeholder') }}" required></textarea>
+            </label>
+            <button class="button button--primary" type="submit">{{ t('contact.send') }}</button>
+        </form>
+    </article>
+
+    <aside class="contact-side-card">
+        <h3>{{ t('contact.help.title') }}</h3>
+        <ul>
+            <li>{{ t('contact.help.1') }}</li>
+            <li>{{ t('contact.help.2') }}</li>
+            <li>{{ t('contact.help.3') }}</li>
+            <li>{{ t('contact.help.4') }}</li>
+        </ul>
+    </aside>
+</section>
+{% endif %}
+{% endblock %}

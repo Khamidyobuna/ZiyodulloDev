@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.db
+*.sqlite3
+*-journal
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+config.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+
+# Database files in data/ and storage/
+data/*.db
+data/*.db-journal
+storage/*.db
+storage/*.db-journal
+ziyodev.db
+ziyodev.db-journal
+sqlite_smoke.db
+
+# Telegram session files (if any)
+*.session
+*.session-journal
+
+# Temporary files
+tmp/
+temp/
+*.tmp

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | ZiyoDev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-theme="dark">
+    <div class="site-shell">
+        <header class="site-header">
+            <a class="brand-mark" href="{{ url_for_lang('home') }}">
+                <span class="brand-mark__code">&lt;/&gt;</span>
+                <span>ZiyoDev</span>
+            </a>
+
+            <nav class="site-nav">
+                <a href="{{ url_for_lang('home') }}" class="{{ 'is-active' if active_page == 'home' else '' }}">{{ t('nav.home') }}</a>
+                <a href="{{ url_for_lang('interests') }}" class="{{ 'is-active' if active_page == 'interests' else '' }}">{{ t('nav.interests') }}</a>
+                <a href="{{ url_for_lang('about') }}" class="{{ 'is-active' if active_page == 'about' else '' }}">{{ t('nav.about') }}</a>
+                <a href="{{ url_for_lang('contact_page') }}" class="{{ 'is-active' if active_page == 'contact' else '' }}">{{ t('nav.contact') }}</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="language-switcher">
+                    {% for lang_code, lang_label in languages.items() %}
+                    <a href="{{ url_for('set_language', lang=lang_code, next=request.path) }}"
+                       class="{{ 'is-active' if current_lang == lang_code else '' }}">
+                        {{ lang_label }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <button id="theme-toggle" class="theme-toggle" type="button" aria-label="{{ t('theme.label') }}">
+                    {{ t('theme.light') }}
+                </button>
+            </div>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <p>{{ t('footer.tech') }}</p>
+            <p>&copy; {{ current_year }} ZiyoDev</p>
+        </footer>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div class="chat-widget" id="chat-widget"
+         data-chat-typing="{{ t('chat.typing') }}"
+         data-chat-error="{{ t('chat.error') }}">
+        <button class="chat-widget__toggle" id="chat-toggle" type="button" aria-label="{{ t('chat.title') }}">
+            <span>AI</span>
+        </button>
+        <section class="chat-widget__panel" id="chat-panel" hidden aria-hidden="true">
+            <div class="chat-widget__header">
+                <div>
+                    <strong>{{ t('chat.title') }}</strong>
+                    <p>{{ t('chat.subtitle') }}</p>
+                </div>
+                <button class="chat-widget__close" id="chat-close" type="button" aria-label="Close chat">&times;</button>
+            </div>
+            <div class="chat-widget__messages" id="chat-messages">
+                <div class="chat-bubble chat-bubble--ai">
+                    {{ t('chat.greeting') }}
+                </div>
+            </div>
+            <form class="chat-widget__form" id="chat-form">
+                <textarea id="chat-input" rows="1" placeholder="{{ t('chat.placeholder') }}"></textarea>
+                <button type="submit">{{ t('chat.send') }}</button>
+            </form>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

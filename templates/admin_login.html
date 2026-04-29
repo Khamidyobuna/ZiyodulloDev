@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('admin.login_title') }} | ZiyoDev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-auth-body" data-theme="dark">
+    <div class="admin-auth-card">
+        <div class="language-switcher language-switcher--auth">
+            {% for lang_code, lang_label in languages.items() %}
+            <a href="{{ url_for('set_language', lang=lang_code, next=request.path) }}"
+               class="{{ 'is-active' if current_lang == lang_code else '' }}">
+                {{ lang_label }}
+            </a>
+            {% endfor %}
+        </div>
+        <p class="hero-section__eyebrow">ZiyoDev CMS</p>
+        <h1>{{ t('admin.login_title') }}</h1>
+        <p>{{ t('admin.login_hint') }}</p>
+        {% if error_message %}
+        <div class="admin-error">{{ error_message }}</div>
+        {% endif %}
+        <form method="post" class="admin-auth-form">
+            <label>
+                <span>{{ t('admin.username') }}</span>
+                <input type="text" name="username" required>
+            </label>
+            <label>
+                <span>{{ t('admin.password') }}</span>
+                <input type="password" name="password" required>
+            </label>
+            <button class="button button--primary" type="submit">{{ t('admin.login_button') }}</button>
+        </form>
+        <a class="button button--ghost" href="{{ url_for_lang('home') }}">{{ t('admin.back_site') }}</a>
+    </div>
+</body>
+</html>
