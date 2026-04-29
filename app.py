@@ -1,12 +1,23 @@
 from __future__ import annotations
 
 import json
+import os
+import os
 import re
 import secrets
 from functools import wraps
 
 import requests
-from flask import Flask, abort, jsonify, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    abort,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from ai_service import generate_ai_reply
 from config import (
@@ -27,7 +38,6 @@ from models import (
     init_db,
 )
 from translations import LANGUAGE_LABELS, get_page_meta, t
-
 
 app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
@@ -63,7 +73,12 @@ def admin_required(view_func):
     def wrapped_view(*args, **kwargs):
         if not session.get("admin_logged_in"):
             if request.path.startswith("/api/"):
-                return jsonify({"success": False, "message": translate("toast.save_error")}), 401
+                return (
+                    jsonify(
+                        {"success": False, "message": translate("toast.save_error")}
+                    ),
+                    401,
+                )
             return redirect(url_for("admin_login", lang=get_current_language()))
         return view_func(*args, **kwargs)
 
@@ -89,7 +104,9 @@ def serialize_section(section: SiteContent, lang: str) -> dict:
         "translations": {
             code: {
                 "title": translations.get(code, {}).get("title", localized["title"]),
-                "content_html": translations.get(code, {}).get("content_html", localized["content_html"]),
+                "content_html": translations.get(code, {}).get(
+                    "content_html", localized["content_html"]
+                ),
             }
             for code in SUPPORTED_LANGUAGES
         },
@@ -116,7 +133,9 @@ def get_or_create_web_identity() -> str:
     return session["chat_identity"]
 
 
-def send_telegram_notification(contact_message: ContactMessages) -> tuple[bool, str | None]:
+def send_telegram_notification(
+    contact_message: ContactMessages,
+) -> tuple[bool, str | None]:
     api_url = f"https://api.telegram.org/bot{NOTIFICATION_BOT_TOKEN}/sendMessage"
     text = (
         "Yangi ZiyoDev contact xabari\n\n"
@@ -141,7 +160,10 @@ def send_telegram_notification(contact_message: ContactMessages) -> tuple[bool, 
     if response.ok and payload.get("ok"):
         return True, None
 
-    return False, payload.get("description") or response.text or "Unknown Telegram error"
+    return (
+        False,
+        payload.get("description") or response.text or "Unknown Telegram error",
+    )
 
 
 def page_options(lang: str) -> list[dict[str, str]]:
@@ -268,7 +290,11 @@ def admin_dashboard():
     try:
         sections = (
             db_session.query(SiteContent)
-            .order_by(SiteContent.page_name.asc(), SiteContent.sort_order.asc(), SiteContent.id.asc())
+            .order_by(
+                SiteContent.page_name.asc(),
+                SiteContent.sort_order.asc(),
+                SiteContent.id.asc(),
+            )
             .all()
         )
         messages = (
@@ -301,11 +327,16 @@ def collect_translations(payload: dict) -> dict:
             "content_html": (payload.get(content_key) or "").strip(),
         }
     uz_title = translations["uz"]["title"] or (payload.get("title") or "").strip()
-    uz_content = translations["uz"]["content_html"] or (payload.get("content_html") or "").strip()
+    uz_content = (
+        translations["uz"]["content_html"]
+        or (payload.get("content_html") or "").strip()
+    )
 
     for lang in SUPPORTED_LANGUAGES:
         translations[lang]["title"] = translations[lang]["title"] or uz_title
-        translations[lang]["content_html"] = translations[lang]["content_html"] or uz_content
+        translations[lang]["content_html"] = (
+            translations[lang]["content_html"] or uz_content
+        )
 
     return translations
 
@@ -321,20 +352,42 @@ def update_content():
     is_active = bool(payload.get("is_active"))
     translations = collect_translations(payload)
 
-    if not page_name or not translations["uz"]["title"] or not translations["uz"]["content_html"]:
-        return jsonify({"success": False, "message": "Sahifa, o'zbekcha sarlavha va o'zbekcha kontent majburiy."}), 400
+    if (
+        not page_name
+        or not translations["uz"]["title"]
+        or not translations["uz"]["content_html"]
+    ):
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Sahifa, o'zbekcha sarlavha va o'zbekcha kontent majburiy.",
+                }
+            ),
+            400,
+        )
 
     db_session = get_db_session()
     try:
         if content_id:
-            section = db_session.query(SiteContent).filter(SiteContent.id == int(content_id)).first()
+            section = (
+                db_session.query(SiteContent)
+                .filter(SiteContent.id == int(content_id))
+                .first()
+            )
             if not section:
                 return jsonify({"success": False, "message": "Bo'lim topilmadi."}), 404
         else:
-            base_section_id = section_id or f"{page_name}-{slugify(translations['uz']['title'])}"
+            base_section_id = (
+                section_id or f"{page_name}-{slugify(translations['uz']['title'])}"
+            )
             unique_section_id = base_section_id
             counter = 1
-            while db_session.query(SiteContent).filter(SiteContent.section_id == unique_section_id).first():
+            while (
+                db_session.query(SiteContent)
+                .filter(SiteContent.section_id == unique_section_id)
+                .first()
+            ):
                 counter += 1
                 unique_section_id = f"{base_section_id}-{counter}"
             section = SiteContent(
@@ -348,11 +401,19 @@ def update_content():
         requested_section_id = section_id or section.section_id
         duplicate = (
             db_session.query(SiteContent)
-            .filter(SiteContent.section_id == requested_section_id, SiteContent.id != getattr(section, "id", 0))
+            .filter(
+                SiteContent.section_id == requested_section_id,
+                SiteContent.id != getattr(section, "id", 0),
+            )
             .first()
         )
         if duplicate:
-            return jsonify({"success": False, "message": "Bu section_id allaqachon mavjud."}), 400
+            return (
+                jsonify(
+                    {"success": False, "message": "Bu section_id allaqachon mavjud."}
+                ),
+                400,
+            )
 
         section.section_id = requested_section_id
         section.page_name = page_name
@@ -367,7 +428,9 @@ def update_content():
             {
                 "success": True,
                 "message": translate("toast.save_success"),
-                "redirect_url": url_for(PAGE_ENDPOINTS.get(page_name, "home"), lang=get_current_language()),
+                "redirect_url": url_for(
+                    PAGE_ENDPOINTS.get(page_name, "home"), lang=get_current_language()
+                ),
             }
         )
     finally:
@@ -384,7 +447,12 @@ def send_contact():
     message_content = (payload.get("message") or "").strip()
 
     if not name or not email or not message_content:
-        return jsonify({"success": False, "message": translate("toast.contact_error", lang)}), 400
+        return (
+            jsonify(
+                {"success": False, "message": translate("toast.contact_error", lang)}
+            ),
+            400,
+        )
 
     db_session = get_db_session()
     try:
@@ -445,13 +513,37 @@ def update_admin_settings():
     confirm_password = (payload.get("confirm_password") or "").strip()
 
     if not username or not current_password:
-        return jsonify({"success": False, "message": translate("admin.settings_required", lang)}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": translate("admin.settings_required", lang),
+                }
+            ),
+            400,
+        )
 
     if new_password and len(new_password) < 6:
-        return jsonify({"success": False, "message": translate("admin.settings_password_short", lang)}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": translate("admin.settings_password_short", lang),
+                }
+            ),
+            400,
+        )
 
     if new_password != confirm_password:
-        return jsonify({"success": False, "message": translate("admin.settings_password_mismatch", lang)}), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": translate("admin.settings_password_mismatch", lang),
+                }
+            ),
+            400,
+        )
 
     db_session = get_db_session()
     try:
@@ -462,10 +554,26 @@ def update_admin_settings():
             .first()
         )
         if duplicate:
-            return jsonify({"success": False, "message": translate("admin.settings_username_taken", lang)}), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": translate("admin.settings_username_taken", lang),
+                    }
+                ),
+                400,
+            )
 
         if not settings.check_password(current_password):
-            return jsonify({"success": False, "message": translate("admin.settings_current_wrong", lang)}), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": translate("admin.settings_current_wrong", lang),
+                    }
+                ),
+                400,
+            )
 
         settings.username = username
         if new_password:
@@ -473,10 +581,15 @@ def update_admin_settings():
 
         db_session.commit()
         session["admin_logged_in"] = True
-        return jsonify({"success": True, "message": translate("admin.settings_saved", lang)})
+        return jsonify(
+            {"success": True, "message": translate("admin.settings_saved", lang)}
+        )
     finally:
         db_session.close()
 
 
+import os
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
